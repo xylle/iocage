@@ -58,6 +58,7 @@ _iocage() {
     cmds)
       _values "iocage command" \
         "activate[activate zpool]" \
+        "backup[backup the specified jail]" \
         "chroot[chroot into a jail]" \
         "clean[destroy zfs datasets]" \
         "clone[clone a jail]" \
@@ -150,6 +151,10 @@ _iocage() {
             '(-u --host_user)'{-u,--host_user}'[user on host to run command as]':name:_users
           ;;
         export)
+          _arguments \
+            :jail:_iocage_list_jails
+          ;;
+        backup)
           _arguments \
             :jail:_iocage_list_jails
           ;;
