@@ -21,22 +21,37 @@
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-"""backup module for the cli."""
-import click
 
-import iocage_lib.iocage as ioc
+import datetime
+import os
 
-__rootcmd__ = True
+import pytest
 
 
-@click.command(name="backup", help="Backup a specified jail.")
-@click.option(
-    '--compression', '-c',
-    default='zip',
-    help='Choose which compression algorithm to '
-         'use for backuping jail (zip/lzma).'
-)
-@click.argument("jail", required=True)
-def cli(compression, jail):
-    """Make a recursive snapshot of the jail and backup to a file."""
-    ioc.IOCage(jail=jail).backup(compression)
+require_root = pytest.mark.require_root
+require_zpool = pytest.mark.require_zpool
+require_image = pytest.mark.require_image
+
+
+@require_root
+@require_zpool
+@require_image
+def test_01_backup_jail(invoke_cli, resource_selector, skip_test):
+    jails = resource_selector.all_jails
+    skip_test(not jails)
+
+    jail = jails[0]
+    invoke_cli(
+        ['backup', jail.name]
+    )
+
+    assert os.path.isdir(jail.zfs.images_dataset_path) is True, \
+        f'{jail.zfs.images_dataset_path} does not exist'
+
+    filename = f'{jail.name}_{datetime.datetime.utcnow().strftime("%F")}.zip'
+    list_dir = os.listdir(jail.zfs.images_dataset_path)
+
+    assert filename in list_dir, f'{filename} does not exist'
+
+    assert filename.replace('zip', 'sha256') in list_dir, \
+        f'{filename.replace("zip", "sha256")} does not exist'

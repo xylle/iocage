@@ -93,6 +93,10 @@ _iocage() {
           _arguments \
             :zpool:_iocage_list_zpools
           ;;
+        backup)
+          _arguments \
+            :jail:_iocage_list_jails
+          ;;
         chroot)
           _arguments \
             :jail:_iocage_list_jails
@@ -151,10 +155,6 @@ _iocage() {
             '(-u --host_user)'{-u,--host_user}'[user on host to run command as]':name:_users
           ;;
         export)
-          _arguments \
-            :jail:_iocage_list_jails
-          ;;
-        backup)
           _arguments \
             :jail:_iocage_list_jails
           ;;
