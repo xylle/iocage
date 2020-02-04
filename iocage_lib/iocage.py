@@ -360,6 +360,15 @@ class IOCage:
             else:
                 pool.deactivate_pool()
 
+    def backup(self, compression_algo='zip'):
+        """Will backup a jail"""
+        uuid, path = self.__check_jail_existence__()
+        status, _ = self.list("jid", uuid=uuid)
+
+        ioc_image.IOCImage().export_jail(
+            uuid, path, compression_algo=compression_algo
+        )
+
     def chroot(self, command):
         """Deprecated: Chroots into a jail and runs a command, or the shell."""
         ioc_common.logit(
